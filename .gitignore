@@ -3,6 +3,7 @@ doc/
 target/
 *.class
 *.jar
+*.swp
 hs_err_pid*
 *~
 \#*\#
