@@ -11,9 +11,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.scene.layout.Priority;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 
 /**
  * REPLACE WITH NON-SHOUTING DESCRIPTION OF YOUR APP.
@@ -24,7 +26,6 @@ public class ApiApp extends Application {
     Scene scene;
     
     /** The root container for the application scene graph. */
-
     VBox root;
 
     /** The container for the Search functions*/
@@ -32,9 +33,9 @@ public class ApiApp extends Application {
     TextField searchField;
     Button searchButton;
 
-    
     /** The container for the current weather */
     // IF NEEDED ADD HBOX FOR RESIZE!!!!!!
+    HBox cWTHBox;
     Text currentWeatherText;
     
     /** The container for the DisplayComponent */
@@ -48,7 +49,7 @@ public class ApiApp extends Application {
      */
     public ApiApp() {
         /** Initialize root */    
-        root = new VBox();
+        root = new VBox(5);
         
         /** Initialize Search components */
         searchBarHBox = new HBox(10);
@@ -56,6 +57,7 @@ public class ApiApp extends Application {
         searchButton = new Button("Find");
 
         /** Initialize current weather text */
+        cWTHBox = new HBox();
         currentWeatherText = new Text();
 
         /** Initialize Display Components */
@@ -83,13 +85,21 @@ public class ApiApp extends Application {
         // setup scene
         root.getChildren().addAll(banner, notice);
         */
-        
         HBox.setHgrow(searchField, Priority.ALWAYS);
+        this.searchButton.setOnAction(event -> {
+            runNow(() -> this.apiMethod());
+        });
         searchBarHBox.getChildren().addAll(searchField, searchButton);
-
+        
+        currentWeatherText.setTextAlignment(TextAlignment.CENTER);
+        currentWeatherText.setText("PlaceHolderText");
+        cWTHBox.setAlignment(Pos.CENTER);
+        // cWTHBox.setMinWidth(root.getWidth();
+        cWTHBox.getChildren().add(currentWeatherText);
 
         display.getChildren().addAll(city, weather);
-        root.getChildren().addAll(searchBarHBox, display);
+        root.getChildren().addAll(searchBarHBox, cWTHBox, display);
+  
         scene = new Scene(root);
 
         // setup stage
@@ -102,4 +112,13 @@ public class ApiApp extends Application {
 
     } // start
 
+    private static void runNow(Runnable target) {
+        Thread thread = new Thread(target);
+        thread.setDaemon(true);
+        thread.start();
+    } // runNow
+
+    private void apiMethod() {
+        // call ApiSearch here
+    } // apiMethod
 } // ApiApp
