@@ -119,6 +119,7 @@ public class ApiApp extends Application {
     } // runNow
 
     private void apiMethod() {
-        // call ApiSearch here
+        ApiSearch apiSearch = new ApiSearch();
+        apiSearch.executeApiCall();
     } // apiMethod
 } // ApiApp

@@ -28,19 +28,16 @@ public class ApiSearch {
      * Represents an GeoCoding API document.
      */
 
-    static class GeoApiResponse {
-        GeoApiResult[] geoResults;
+    static class GeoApiResponse{
+        float lat;
+        float lon;
     } // GeoApiResponse
 
-    static class GeoApiResult {
-        double lat;
-        double lon;
-    } // GeoApiResult
     /**
      * Represents a WeatherMap API document.
      */
     static class WeatherApiResponse {
-        WeatherApiResult[] weatherResults;
+        WeatherApiResult[] weather;
         WeatherApiMain main;
     } // WeatherApiResponse
 
@@ -57,11 +54,11 @@ public class ApiSearch {
      */
 
     static class UnsplashApiResponse {
-        UnsplashApiResult[] unsplashResults;
+        UnsplashApiResult[] results;
     } // UnsplashApiResponse
 
     static class UnsplashApiResult {
-        UnsplashUrl[] unsplashUrl;
+        UnsplashUrl urls;
     } // UnsplashApiResult
 
     static class UnsplashUrl {
@@ -81,23 +78,16 @@ public class ApiSearch {
     private final static String WEATHER_API = "https://api.openweathermap.org/data/2.5/weather";
     private final static String UNSPLASH_API = "https://api.unsplash.com/search/photos";
 
-    public static void main(String[] args) {
+    public void executeApiCall() {
         setApiKeys();
         try {
             String city = URLEncoder.encode("atlanta", StandardCharsets.UTF_8);
             String limit = URLEncoder.encode("5", StandardCharsets.UTF_8);
-            String query = String.format("?q=%s&limit=%s&appid=&s", city, limit, geoApiKey);
+            String query = String.format("?q=%s&limit=%s&appid=%s", city, limit, geoApiKey);
             String geoUri = GEO_API + query;
-
-            String latQuery = URLEncoder.encode("33.75", StandardCharsets.UTF_8);
-            String lonQuery =  URLEncoder.encode("-84.39", StandardCharsets.UTF_8); 
-            query = String.format("?lat=%s&lon=%s&appid=&s", latQuery, lonQuery, weatherApiKey);
-            String weatherUri = WEATHER_API + query;
-
-            String photoCity = URLEncoder.encode("atlanta", StandardCharsets.UTF_8); 
-            query = String.format("?query=%s&client_id=%s", photoCity, unsplashApiKey);
-            String unsplashUri = UNSPLASH_API + query;
-             
+            
+            System.out.println(geoUri);
+            
             HttpRequest geoRequest = HttpRequest.newBuilder()
                 .uri(URI.create(geoUri))
                 .build();
@@ -105,19 +95,47 @@ public class ApiSearch {
                 .send(geoRequest, BodyHandlers.ofString());
             // ensure the request is okay
             if (geoResponse.statusCode() != 200) {
+                System.err.println(geoResponse.statusCode());
                 throw new IOException(geoResponse.toString());
             } // if
+
+            String stringGeoResponse = geoResponse.body();
+            // System.out.println(stringGeoResponse.trim());
+            GeoApiResponse[] geoApiResponse = GSON
+                .fromJson(stringGeoResponse, ApiSearch.GeoApiResponse[].class);
+
+            System.out.println(GSON.toJson(geoApiResponse[0].lat));
+            
+            String stringLat = String.valueOf(geoApiResponse[0].lat);
+            String stringLon = String.valueOf(geoApiResponse[0].lon);
+
+            String latQuery = URLEncoder.encode(stringLat, StandardCharsets.UTF_8);
+            String lonQuery =  URLEncoder.encode(stringLon, StandardCharsets.UTF_8); 
+            query = String.format("?lat=%s&lon=%s&appid=%s", latQuery, lonQuery, weatherApiKey);
+            String weatherUri = WEATHER_API + query;
 
             HttpRequest weatherRequest = HttpRequest.newBuilder()
                 .uri(URI.create(weatherUri))
                 .build();
             HttpResponse<String> weatherResponse = HTTP_CLIENT
                 .send(weatherRequest, BodyHandlers.ofString());
-            // ensure the request is okay
+            // ensure the request is okay 
             if (weatherResponse.statusCode() != 200) {
                 throw new IOException(weatherResponse.toString());
             } // if
+          
+           String stringWeatherResponse = weatherResponse.body();
 
+            // System.out.println(stringWeatherResponse.trim());
+            WeatherApiResponse weatherApiResponse = GSON
+                .fromJson(stringWeatherResponse, ApiSearch.WeatherApiResponse.class);
+
+            System.out.println(GSON.toJson(weatherApiResponse));            
+
+            String photoCity = URLEncoder.encode("atlanta", StandardCharsets.UTF_8); 
+            query = String.format("?query=%s&client_id=%s", photoCity, unsplashApiKey);
+            String unsplashUri = UNSPLASH_API + query;
+ 
             HttpRequest unsplashRequest = HttpRequest.newBuilder()
                 .uri(URI.create(unsplashUri))
                 .build();
@@ -128,11 +146,12 @@ public class ApiSearch {
                 throw new IOException(unsplashResponse.toString());
             } // if
 
-            GeoApiResponse geoApiResponse = GSON
-                .fromJson(geoResponse.body(), ApiSearch.GeoApiResponse.class);
+            String stringUnsplashResponse = unsplashResponse.body();
+            // System.out.println(stringUnsplashResponse.trim());
+            UnsplashApiResponse unsplashApiResponse = GSON
+                .fromJson(stringUnsplashResponse, ApiSearch.UnsplashApiResponse.class);
 
-            System.out.println(GSON.toJson(geoApiResponse));            
-
+            System.out.println(GSON.toJson(unsplashApiResponse.results[0].urls.regular));            
          } catch (IOException | InterruptedException e) {
             // either:
             // 1. an I/O error occurred when sending or receiving;
@@ -142,7 +161,7 @@ public class ApiSearch {
             e.printStackTrace();
         } // try
 
-    } // main
+    } // executeApiCall
 
 
     private static void setApiKeys() {
