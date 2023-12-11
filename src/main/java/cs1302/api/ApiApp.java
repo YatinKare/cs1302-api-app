@@ -18,8 +18,11 @@ import javafx.application.Platform;
 import javafx.geometry.Pos;
 import java.lang.Math;
 /**
- * REPLACE WITH NON-SHOUTING DESCRIPTION OF YOUR APP.
+ * This App prompts the user to enter in a city name and displays the current temperature
+ * , an image related to the city, and an image related to the status of the weather
+ * conditions. This is done through API calls.
  */
+
 public class ApiApp extends Application {
     /** Instance variables for the stage and scene. */
     Stage stage;
@@ -34,7 +37,6 @@ public class ApiApp extends Application {
     Button searchButton;
 
     /** The container for the current weather. */
-    // IF NEEDED ADD HBOX FOR RESIZE!!!!!!
     HBox cWTHBox;
     static Text currentWeatherText;
 
@@ -110,6 +112,7 @@ public class ApiApp extends Application {
      * @param target the object whose {@code run} method is invoked when this
      *               thread is started
      */
+
     private static void runNow(Runnable target) {
         Thread thread = new Thread(target);
         thread.setDaemon(true);
@@ -138,7 +141,7 @@ public class ApiApp extends Application {
         if (!ApiApp.currentWeatherText.getText().equals("City Not available")) {
             try {
                 temp = Double.valueOf(output[0]);
-                temp = Math.round(((temp - 273.15) * (9/5) + 35) * Math.pow(10, 2))
+                temp = Math.round(((temp - 273.15) * (9 / 5) + 35) * Math.pow(10, 2))
                     / Math.pow(10, 2);
                 String stringTemp = String.valueOf(temp);
                 Platform.runLater(() -> {

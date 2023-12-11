@@ -23,8 +23,9 @@ import com.google.gson.GsonBuilder;
  * This class retrieves a images of the weather and the city based on the
  * search results.
  * @throws IOException if any unknown error.
- * @throws IllegalArgumentExcepton if any unknown error.  
+ * @throws IllegalArgumentExcepton if any unknown error.
  */
+
 public class ApiSearch {
 
     // Config variables for Apis
@@ -36,7 +37,7 @@ public class ApiSearch {
     // Global variables for latitude and longitude
     private static String stringLat;
     private static String stringLon;
-    
+
     // I/O variables
     private static String input;
     public String[] output = new String[3];
@@ -94,26 +95,27 @@ public class ApiSearch {
     } // UnsplashUrl
 
     private static HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-        .version(HttpClient.Version.HTTP_2)           
-        .followRedirects(HttpClient.Redirect.NORMAL)  
-        .build();                                     
+        .version(HttpClient.Version.HTTP_2)
+        .followRedirects(HttpClient.Redirect.NORMAL)
+        .build();
 
     private static Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
         .create();
 
     // Base Api query URIs
-    private final static String GEO_API = "http://api.openweathermap.org/geo/1.0/direct";
-    private final static String WEATHER_API = "https://api.openweathermap.org/data/2.5/weather";
-    private final static String UNSPLASH_API = "https://api.unsplash.com/search/photos";
+    private static final String GEO_API = "http://api.openweathermap.org/geo/1.0/direct";
+    private static final String WEATHER_API = "https://api.openweathermap.org/data/2.5/weather";
+    private static final String UNSPLASH_API = "https://api.unsplash.com/search/photos";
 
     /**
      * Takes in a {@code input} city and returns an array of strings {@code output}
-     * with desired information. Uses HttpClient, HttpRequest, and 
-     * HttpResponse to request information. Uses GSON libary to pase JSON 
+     * with desired information. Uses HttpClient, HttpRequest, and
+     * HttpResponse to request information. Uses GSON libary to pase JSON
      * information. if Geo Coordinates array is null or has no elements,
      * update {@code currentWeatherText} to show user error.
-     * @param input city String input.
+     * @param inp city String input.
+     * @return String[] array of important values.
      * @throws IOException if any errors.
      * @throws InterruptedException if any errors.
      */
@@ -125,8 +127,11 @@ public class ApiSearch {
             if (getGeoApiData()) {
                 // -------------------------WEATHER API - TEMPERATURE-------------
                 String latQuery = URLEncoder.encode(stringLat, StandardCharsets.UTF_8);
-                String lonQuery =  URLEncoder.encode(stringLon, StandardCharsets.UTF_8); 
-                String query = String.format("?lat=%s&lon=%s&appid=%s", latQuery, lonQuery, weatherApiKey);
+                String lonQuery =  URLEncoder.encode(stringLon, StandardCharsets.UTF_8);
+                String query = String.format("?lat=%s&lon=%s&appid=%s",
+                    latQuery,
+                    lonQuery,
+                    weatherApiKey);
                 String weatherUri = WEATHER_API + query;
 
                 HttpRequest weatherRequest = HttpRequest.newBuilder()
@@ -134,7 +139,7 @@ public class ApiSearch {
                     .build();
                 HttpResponse<String> weatherResponse = HTTP_CLIENT
                     .send(weatherRequest, BodyHandlers.ofString());
-                // ensure the request is okay 
+                // ensure the request is okay
                 if (weatherResponse.statusCode() != 200) {
                     throw new IOException(weatherResponse.toString());
                 } // if
@@ -144,10 +149,10 @@ public class ApiSearch {
                 WeatherApiResponse weatherApiResponse = GSON
                     .fromJson(stringWeatherResponse, ApiSearch.WeatherApiResponse.class);
 
-                // System.out.println(GSON.toJson(weatherApiResponse));            
+                // System.out.println(GSON.toJson(weatherApiResponse));
                 String weatherDescription = weatherApiResponse.weather[0].description + " weather";
                 output[0] = String.valueOf(weatherApiResponse.main.temp);
-                
+
                 //CITY PHOTO
                 getCityPhoto();
 
@@ -156,7 +161,7 @@ public class ApiSearch {
             } else {
                 Platform.runLater(() -> {
                     ApiApp.currentWeatherText.setText("City Not available");
-                }); 
+                });
             } // if
 
         } catch (IOException | InterruptedException e) {
@@ -173,12 +178,11 @@ public class ApiSearch {
     /**
      * Conducts API search using the Geo Api. Gets coordinates of input city.
      * Returns weather of not the city was found.
-     * @return true if coordinates are found.
-     * @return flase if coordinates not found.
+     * @return true if coordinates are found, false if not.
      * @throws IOException if I/O error.
      * @throws InterruptedException if operation was interrupted.
      */
-    private static boolean getGeoApiData() throws IOException, InterruptedException{
+    private static boolean getGeoApiData() throws IOException, InterruptedException {
         String city = URLEncoder.encode(input, StandardCharsets.UTF_8);
         String limit = URLEncoder.encode("5", StandardCharsets.UTF_8);
         String query = String.format("?q=%s&limit=%s&appid=%s", city, limit, geoApiKey);
@@ -220,7 +224,7 @@ public class ApiSearch {
      */
     private void getCityPhoto() throws IOException, InterruptedException {
 
-        String photoCity = URLEncoder.encode(input, StandardCharsets.UTF_8); 
+        String photoCity = URLEncoder.encode(input, StandardCharsets.UTF_8);
         String query = String.format("?query=%s&client_id=%s", photoCity, unsplashApiKey);
         String unsplashUri = UNSPLASH_API + query;
 
@@ -239,7 +243,7 @@ public class ApiSearch {
         UnsplashApiResponse unsplashApiResponse = GSON
             .fromJson(stringUnsplashResponse, ApiSearch.UnsplashApiResponse.class);
 
-        // System.out.println(GSON.toJson(unsplashApiResponse.results[0].urls.regular));            
+        // System.out.println(GSON.toJson(unsplashApiResponse.results[0].urls.regular));
         output[1] = unsplashApiResponse.results[0].urls.regular;
 
         String fileName = "resources/cityPhoto.jpg";
@@ -266,7 +270,7 @@ public class ApiSearch {
      * @throws InterruptedException if operation was interrupted.
      */
     private void getWeatherPhoto(String wD) throws IOException, InterruptedException {
-        String photoWeather = URLEncoder.encode(wD, StandardCharsets.UTF_8); 
+        String photoWeather = URLEncoder.encode(wD, StandardCharsets.UTF_8);
         String query = String.format("?query=%s&client_id=%s", photoWeather, unsplashApiKey);
         String unsplashUri = UNSPLASH_API + query;
 
@@ -285,14 +289,14 @@ public class ApiSearch {
         UnsplashApiResponse unsplashApiResponse = GSON
             .fromJson(stringUnsplashResponse, ApiSearch.UnsplashApiResponse.class);
 
-        // System.out.println(GSON.toJson(unsplashApiResponse.results[0].urls.regular));            
+        // System.out.println(GSON.toJson(unsplashApiResponse.results[0].urls.regular));
         output[2] = unsplashApiResponse.results[0].urls.regular;
 
         // a;ldksfja;dlskfja;sldkfjlas;dkfjas;dlfj
         String fileName = "resources/weatherPhoto.jpg";
         Path outputPath = Path.of(fileName);
 
-        String photoWeather2 = URLEncoder.encode(wD, StandardCharsets.UTF_8); 
+        String photoWeather2 = URLEncoder.encode(wD, StandardCharsets.UTF_8);
         query = String.format("?query=%s&client_id=%s", photoWeather2, unsplashApiKey);
         unsplashUri = UNSPLASH_API + query;
 
@@ -317,8 +321,8 @@ public class ApiSearch {
         try (FileInputStream configFileStream = new FileInputStream(configPath)) {
             Properties config = new Properties();
             config.load(configFileStream);
-            config.list(System.out);                                  
-            geoApiKey = config.getProperty("geo.api");         
+            config.list(System.out);
+            geoApiKey = config.getProperty("geo.api");
             weatherApiKey = config.getProperty("weather.api");
             unsplashApiKey = config.getProperty("unsplash.api");
         } catch (IOException ioe) {
@@ -328,6 +332,3 @@ public class ApiSearch {
     } // setApiKeys
 
 } // ApiSearch
-
-
-
