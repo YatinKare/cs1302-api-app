@@ -53,7 +53,7 @@ public class ApiApp extends Application {
      * constructor is executed in Step 2 of the JavaFX Application Life-Cycle.
      */
     public ApiApp() {
-        /** Initialize root */    
+        /** Initialize root */
         root = new VBox(5);
 
         /** Initialize Search components */
@@ -117,12 +117,12 @@ public class ApiApp extends Application {
     } // runNow
 
     /**
-     * Creates a new {@code ApiSearch} object and calls its 
-     * {@code executeApiCall} method with the current text 
+     * Creates a new {@code ApiSearch} object and calls its
+     * {@code executeApiCall} method with the current text
      * of the search field. First the {@code currentWeatherText}
      * is changed to update the status. Second the {@code searchButton}
      * is disabled and then the api method is called.
-     * After trying the Api calls,If the status text is not updated 
+     * After trying the Api calls,If the status text is not updated
      * with "City Not Available", then it will update it wit the temperature
      * in Farenheit. It will also update the DisplayComponents
      * {@code city} and {@code weather} with their respective images.
@@ -138,15 +138,20 @@ public class ApiApp extends Application {
         if (!ApiApp.currentWeatherText.getText().equals("City Not available")) {
             try {
                 temp = Double.valueOf(output[0]);
-                temp = Math.round(((temp - 273.15) * (9/5) + 35) * Math.pow(10, 2)) / Math.pow(10, 2);
+                temp = Math.round(((temp - 273.15) * (9/5) + 35) * Math.pow(10, 2))
+                    / Math.pow(10, 2);
                 String stringTemp = String.valueOf(temp);
                 Platform.runLater(() -> {
                     ImageView imv = (ImageView) this.city.getChildren().get(0);
-                    imv.setImage(new Image("file:resources/cityPhoto.jpg", 500, 500, true, true));
+                    imv.setImage(new Image("file:resources/cityPhoto.jpg",
+                        500, 500,
+                        true, true));
                 });
                 Platform.runLater(() -> {
                     ImageView imv = (ImageView) this.weather.getChildren().get(0);
-                    imv.setImage(new Image("file:resources/weatherPhoto.jpg", 500, 500, true, true));
+                    imv.setImage(new Image("file:resources/weatherPhoto.jpg",
+                        500, 500,
+                        true, true));
                 });
 
                 Platform.runLater(() -> {
