@@ -16,7 +16,7 @@ import javafx.stage.Stage;
 import javafx.scene.layout.Priority;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
-
+import java.lang.Math;
 /**
  * REPLACE WITH NON-SHOUTING DESCRIPTION OF YOUR APP.
  */
@@ -24,24 +24,29 @@ public class ApiApp extends Application {
     /** Instance variables for the stage and scene. */
     Stage stage;
     Scene scene;
-    
+
     /** The root container for the application scene graph. */
     VBox root;
 
-    /** The container for the Search functions*/
+    /** The container for the Search functions.*/
     HBox searchBarHBox;
     TextField searchField;
     Button searchButton;
 
-    /** The container for the current weather */
+    /** The container for the current weather. */
     // IF NEEDED ADD HBOX FOR RESIZE!!!!!!
     HBox cWTHBox;
-    Text currentWeatherText;
-    
-    /** The container for the DisplayComponent */
+    static Text currentWeatherText;
+
+    /** The container for the DisplayComponent. */
     HBox display;
     DisplayComponent city;
     DisplayComponent weather;
+
+    /** Variables for outputs from ApiSearch.executeApiCall.*/
+    String cityText;
+    String weatherText;
+    double temp;
 
     /**
      * Constructs an {@code ApiApp} object. This default (i.e., no argument)
@@ -50,7 +55,7 @@ public class ApiApp extends Application {
     public ApiApp() {
         /** Initialize root */    
         root = new VBox(5);
-        
+
         /** Initialize Search components */
         searchBarHBox = new HBox(10);
         searchField = new TextField("Prompt City...");
@@ -71,26 +76,13 @@ public class ApiApp extends Application {
     public void start(Stage stage) {
 
         this.stage = stage;
-        /**
-        // demonstrate how to load local asset using "file:resources/"
-        Image bannerImage = new Image("file:resources/readme-banner.png");
-        ImageView banner = new ImageView(bannerImage);
 
-        banner.setPreserveRatio(true);
-        banner.setFitWidth(640);
-
-        // some labels to display information
-        Label notice = new Label("Modify the starter code to suit your needs.");
-
-        // setup scene
-        root.getChildren().addAll(banner, notice);
-        */
         HBox.setHgrow(searchField, Priority.ALWAYS);
         this.searchButton.setOnAction(event -> {
             runNow(() -> this.apiMethod());
         });
         searchBarHBox.getChildren().addAll(searchField, searchButton);
-        
+
         currentWeatherText.setTextAlignment(TextAlignment.CENTER);
         currentWeatherText.setText("PlaceHolderText");
         cWTHBox.setAlignment(Pos.CENTER);
@@ -99,7 +91,7 @@ public class ApiApp extends Application {
 
         display.getChildren().addAll(city, weather);
         root.getChildren().addAll(searchBarHBox, cWTHBox, display);
-  
+
         scene = new Scene(root);
 
         // setup stage
@@ -111,15 +103,59 @@ public class ApiApp extends Application {
         Platform.runLater(() -> this.stage.setResizable(false));
 
     } // start
-
+    /**
+     * Creates and immediately starts a new daemon thread that executes
+     * {@code target.run()}. This method, which may be called from any thread,
+     * will return immediately its the caller.
+     * @param target the object whose {@code run} method is invoked when this
+     *               thread is started
+     */
     private static void runNow(Runnable target) {
         Thread thread = new Thread(target);
         thread.setDaemon(true);
         thread.start();
     } // runNow
 
+    /**
+     * Creates a new {@code ApiSearch} object and calls its 
+     * {@code executeApiCall} method with the current text 
+     * of the search field. First the {@code currentWeatherText}
+     * is changed to update the status. Second the {@code searchButton}
+     * is disabled and then the api method is called.
+     * After trying the Api calls,If the status text is not updated 
+     * with "City Not Available", then it will update it wit the temperature
+     * in Farenheit. It will also update the DisplayComponents
+     * {@code city} and {@code weather} with their respective images.
+     */
     private void apiMethod() {
+        Platform.runLater(() -> {
+            ApiApp.currentWeatherText.setText("Loading Temperature...");
+            this.searchButton.setDisable(true);
+        });
         ApiSearch apiSearch = new ApiSearch();
-        apiSearch.executeApiCall();
+        String[] output = new String[3];
+        output = apiSearch.executeApiCall(searchField.getText());
+        if (!ApiApp.currentWeatherText.getText().equals("City Not available")) {
+            try {
+                temp = Double.valueOf(output[0]);
+                temp = Math.round(((temp - 273.15) * (9/5) + 35) * Math.pow(10, 2)) / Math.pow(10, 2);
+                String stringTemp = String.valueOf(temp);
+                Platform.runLater(() -> {
+                    ImageView imv = (ImageView) this.city.getChildren().get(0);
+                    imv.setImage(new Image("file:resources/cityPhoto.jpg", 500, 500, true, true));
+                });
+                Platform.runLater(() -> {
+                    ImageView imv = (ImageView) this.weather.getChildren().get(0);
+                    imv.setImage(new Image("file:resources/weatherPhoto.jpg", 500, 500, true, true));
+                });
+
+                Platform.runLater(() -> {
+                    ApiApp.currentWeatherText.setText("Current Temperature: " + stringTemp + "°F");
+                });
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            } // try
+        }
+        Platform.runLater(() -> this.searchButton.setDisable(false));
     } // apiMethod
 } // ApiApp

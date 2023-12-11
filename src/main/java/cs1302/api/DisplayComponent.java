@@ -33,6 +33,7 @@ public class DisplayComponent extends VBox {
       this.getChildren().addAll(imv, sourceText);
 
       imv.setImage(new Image(DEFAULT_IMG));
+      imv.setPreserveRatio(true);
       //Image defaultImage = new Image(DEFAULT_IMAGE);
         // Insantiate -> root = new VBox();
         // Init code: add to the DisplayComponent
