@@ -172,7 +172,7 @@ public class ApiApp extends Application {
                     ApiApp.currentWeatherText.setText("Current Temperature: " + stringTemp + "°F");
                 });
             } catch (NullPointerException e) {
-                e.printStackTrace();
+                System.out.println("No data found");
             } // try
         }
         Platform.runLater(() -> this.searchButton.setDisable(false));

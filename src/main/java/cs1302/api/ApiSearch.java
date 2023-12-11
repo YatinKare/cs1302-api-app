@@ -169,8 +169,7 @@ public class ApiSearch {
             // 1. an I/O error occurred when sending or receiving;
             // 2. the operation was interrupted; or
             // 3. the Image class could not load the image.
-            System.err.println(e);
-            e.printStackTrace();
+            System.err.println("No Data found");
         } // try
         return output;
     } // executeApiCall
