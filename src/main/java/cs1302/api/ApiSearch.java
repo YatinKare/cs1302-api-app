@@ -154,10 +154,10 @@ public class ApiSearch {
                 output[0] = String.valueOf(weatherApiResponse.main.temp);
 
                 //CITY PHOTO
-                getCityPhoto();
+                output[1] = getCityPhoto();
 
                 //WEATHER PHOTO
-                getWeatherPhoto(weatherDescription);
+                output[2] = getWeatherPhoto(weatherDescription);
             } else {
                 Platform.runLater(() -> {
                     ApiApp.currentWeatherText.setText("City Not available");
@@ -218,11 +218,12 @@ public class ApiSearch {
 
     /**
      * Conducts API search using the Unsplash API. Gets image url of input city.
-     * Similar logic as {@code getGeoApiData()}.
+     * Similar logic as {@code getGeoApiData()}. Returns city image url.
+     * @return outputCity returns uri of original city image
      * @throws IOException if I/O error.
      * @throws InterruptedException if operation was interrupted.
      */
-    private void getCityPhoto() throws IOException, InterruptedException {
+    private String getCityPhoto() throws IOException, InterruptedException {
 
         String photoCity = URLEncoder.encode(input, StandardCharsets.UTF_8);
         String query = String.format("?query=%s&client_id=%s", photoCity, unsplashApiKey);
@@ -244,14 +245,14 @@ public class ApiSearch {
             .fromJson(stringUnsplashResponse, ApiSearch.UnsplashApiResponse.class);
 
         // System.out.println(GSON.toJson(unsplashApiResponse.results[0].urls.regular));
-        output[1] = unsplashApiResponse.results[0].urls.regular;
+        String outputCity = unsplashApiResponse.results[0].urls.regular;
 
         String fileName = "resources/cityPhoto.jpg";
         Path outputPath = Path.of(fileName);
 
 
         unsplashRequest = HttpRequest.newBuilder()
-            .uri(URI.create(output[1]))
+            .uri(URI.create(outputCity))
             .build();
         HttpResponse<Path> unsplashResponseCity = HTTP_CLIENT
             .send(unsplashRequest, BodyHandlers.ofFile(outputPath));
@@ -259,17 +260,21 @@ public class ApiSearch {
         if (unsplashResponseCity.statusCode() != 200) {
             throw new IOException(unsplashResponseCity.toString());
         } // if
+
+        return outputCity;
     } // getCityPhoto
 
     /**
      * Conducts API search using the Unsplash API. Gets image url of weather.
      * Uses previously found {@code weatherDescription}.
      * Similar logic as {@code getGeoApiData()}.
+     * Returns url from image found.
      * @param wD {@code weatherDescription} variable.
+     * @return outputWeather contains weather Url for image.
      * @throws IOException if I/O error.
      * @throws InterruptedException if operation was interrupted.
      */
-    private void getWeatherPhoto(String wD) throws IOException, InterruptedException {
+    private String getWeatherPhoto(String wD) throws IOException, InterruptedException {
         String photoWeather = URLEncoder.encode(wD, StandardCharsets.UTF_8);
         String query = String.format("?query=%s&client_id=%s", photoWeather, unsplashApiKey);
         String unsplashUri = UNSPLASH_API + query;
@@ -290,9 +295,8 @@ public class ApiSearch {
             .fromJson(stringUnsplashResponse, ApiSearch.UnsplashApiResponse.class);
 
         // System.out.println(GSON.toJson(unsplashApiResponse.results[0].urls.regular));
-        output[2] = unsplashApiResponse.results[0].urls.regular;
+        String outputWeather = unsplashApiResponse.results[0].urls.regular;
 
-        // a;ldksfja;dlskfja;sldkfjlas;dkfjas;dlfj
         String fileName = "resources/weatherPhoto.jpg";
         Path outputPath = Path.of(fileName);
 
@@ -301,7 +305,7 @@ public class ApiSearch {
         unsplashUri = UNSPLASH_API + query;
 
         unsplashRequest = HttpRequest.newBuilder()
-            .uri(URI.create(output[2]))
+            .uri(URI.create(outputWeather))
             .build();
         HttpResponse<Path> unsplashResponse2 = HTTP_CLIENT
             .send(unsplashRequest, BodyHandlers.ofFile(outputPath));
@@ -309,6 +313,8 @@ public class ApiSearch {
         if (unsplashResponse2.statusCode() != 200) {
             throw new IOException(unsplashResponse2.toString());
         } // if
+
+        return outputWeather;
 
     } //getWeatherPhoto
 

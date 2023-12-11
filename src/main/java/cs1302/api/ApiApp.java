@@ -83,16 +83,16 @@ public class ApiApp extends Application {
         this.searchButton.setOnAction(event -> {
             runNow(() -> this.apiMethod());
         });
-        searchBarHBox.getChildren().addAll(searchField, searchButton);
+        this.searchBarHBox.getChildren().addAll(searchField, searchButton);
 
-        currentWeatherText.setTextAlignment(TextAlignment.CENTER);
-        currentWeatherText.setText("PlaceHolderText");
-        cWTHBox.setAlignment(Pos.CENTER);
+        this.currentWeatherText.setTextAlignment(TextAlignment.CENTER);
+        this.currentWeatherText.setText("Type a city into the field to see weather");
+        this.cWTHBox.setAlignment(Pos.CENTER);
         // cWTHBox.setMinWidth(root.getWidth();
-        cWTHBox.getChildren().add(currentWeatherText);
+        this.cWTHBox.getChildren().add(currentWeatherText);
 
-        display.getChildren().addAll(city, weather);
-        root.getChildren().addAll(searchBarHBox, cWTHBox, display);
+        this.display.getChildren().addAll(city, weather);
+        this.root.getChildren().addAll(searchBarHBox, cWTHBox, display);
 
         scene = new Scene(root);
 
@@ -138,6 +138,8 @@ public class ApiApp extends Application {
         ApiSearch apiSearch = new ApiSearch();
         String[] output = new String[3];
         output = apiSearch.executeApiCall(searchField.getText());
+        final String cityText = output[1];
+        final String weatherText = output[2];
         if (!ApiApp.currentWeatherText.getText().equals("City Not available")) {
             try {
                 temp = Double.valueOf(output[0]);
@@ -151,10 +153,19 @@ public class ApiApp extends Application {
                         true, true));
                 });
                 Platform.runLater(() -> {
+                    Text t = (Text) this.city.getChildren().get(1);
+                    t.setText(cityText);
+                });
+
+                Platform.runLater(() -> {
                     ImageView imv = (ImageView) this.weather.getChildren().get(0);
                     imv.setImage(new Image("file:resources/weatherPhoto.jpg",
                         500, 500,
                         true, true));
+                });
+                Platform.runLater(() -> {
+                    Text t = (Text) this.weather.getChildren().get(1);
+                    t.setText(weatherText);
                 });
 
                 Platform.runLater(() -> {

@@ -34,7 +34,8 @@ public class DisplayComponent extends VBox {
 
         displayComponentHBox = new HBox(8);
         imv = new ImageView();
-        sourceText = new Text("example");
+        sourceText = new Text("");
+        this.sourceText.setWrappingWidth(500);
 
         this.getChildren().addAll(imv, sourceText);
 
